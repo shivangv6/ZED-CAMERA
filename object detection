@@ -8,13 +8,21 @@ import statistics
 import math
 import tarfile
 import os.path
+
+#All above are required library. So we have import all. 
+
 import rospy, time, math, random
+
+#You need to import rospy if you are writing a ROS Node. 
+
 from std_msgs.msg import Int32, Float32, String
+
+#The std_msgs.msg import is so that we can reuse the std_msgs/String message type (a simple string container) for publishing. 
 
 from threading import Lock, Thread
 from time import sleep
 
-import cv2
+import cv2  #openCV library
 
 # ZED imports
 import pyzed.sl as sl
@@ -29,11 +37,10 @@ from object_detection.utils import visualization_utils as vis_util
 is_human_present = False
 
 pub = rospy.Publisher('chatter', Int32, queue_size = 10)
-rospy.init_node('object', anonymous = True)
 
+#node is publishing to the chatter topic using the message type Int32.
 
-
-
+rospy.init_node('object', anonymous = True)  #tells rospy the name of your node
 
 def load_image_into_numpy_array(image):
     ar = image.get_data()
@@ -41,6 +48,7 @@ def load_image_into_numpy_array(image):
     (im_height, im_width, channels) = image.get_data().shape
     return np.array(ar).reshape((im_height, im_width, 3)).astype(np.uint8)
 
+#Function is defined to laod image into array.
 
 def load_depth_into_numpy_array(depth):
     ar = depth.get_data()
@@ -48,11 +56,12 @@ def load_depth_into_numpy_array(depth):
     (im_height, im_width, channels) = depth.get_data().shape
     return np.array(ar).reshape((im_height, im_width, channels)).astype(np.float32)
 
+#Function is defined to load dept into numpy array
 
 lock = Lock()
 width = 500
 height = 400
-confidence = 0.55
+confidence = 0.55       #zed detects an object if its acuracy is 55%.
 
 image_np_global = np.zeros([width, height, 3], dtype=np.uint8)
 depth_np_global = np.zeros([width, height, 4], dtype=np.float)
@@ -122,6 +131,8 @@ def display_objects_distances(image_np, depth_np, num_detections, boxes_, classe
             else:
                 display_str = '{}: {}%'.format(display_str, int(100 * scores_[i]))
 
+### display_str contain all the object which are train in model.
+
             # Find object distance
             ymin, xmin, ymax, xmax = box
             x_center = int(xmin * width + (xmax - xmin) * width * 0.5)
@@ -156,13 +167,13 @@ def display_objects_distances(image_np, depth_np, num_detections, boxes_, classe
                 distance = math.sqrt(x * x + y * y + z * z)
 
                 display_str = display_str + " " + str('% 6.2f' % distance) + " m "
-                if "person" in display_str and distance < 1.5:
+                if "person" in display_str and distance < 1.5:        #Zed camera detect person in the range of 1.5 meter.
                     # is_human_present = True
                     print(display_str)
                     flag = 1
                   
-                    rospy.loginfo(display_str)
-                    pub.publish(flag)
+                    rospy.loginfo(display_str)                        #the messages get printed to screen
+                    pub.publish(flag)                                 #publishes a Int to our chatter topic
                    
                 # print(distance)
                     box_to_display_str_map[box].append(display_str)
