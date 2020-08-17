@@ -170,7 +170,7 @@ def display_objects_distances(image_np, depth_np, num_detections, boxes_, classe
                 if "person" in display_str and distance < 1.5:        #Zed camera detect person in the range of 1.5 meter.
                     # is_human_present = True
                     print(display_str)
-                    flag = 1
+                    flag = 1                                          #ros flag
                   
                     rospy.loginfo(display_str)                        #the messages get printed to screen
                     pub.publish(flag)                                 #publishes a Int to our chatter topic
